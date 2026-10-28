@@ -28,6 +28,9 @@
    天花板：只比已有载体，**不判**「该不该有版本号」。
 6. `pointer` 指针存活：`REQUIRED_POINTERS` 四个消费方必须各含 ≥1 条正文行同时出现
    `交付闸门` 与 `见`/`消费`（标题行与 `- vX` 历史条目不算）。天花板：只判存活，不判文案是否最新。
+   判据 B（**仅 info**）：`skills/**` 内反引号包裹的 `~/.config/opencode/...` 路径须在本机存在，
+   不存在则报 info（不判红；排除 `<占位符>` 与含 `…` 的模板形态）。补「指针指向已删除文件」这一盲区
+   （2026-10-28 曾有 `design-spec/design-spec/` 双前缀断链 3 天未被捕获）。
 7. `standards` 标准基线：权威源 `## 无障碍基线（WCAG x.y AA）` 是唯一基线；扫描面内任何
    `WCAG x.y`（**排除准则号形态** `2.4.11` / `24×24px`）必须等于基线，否则 rc=1；
    基线解析失败或 `skills/accessibility/SKILL.md` 缺失 ⇒ rc=2。跳过 `- vX` 历史条目与变更日志表格行。
@@ -552,6 +555,29 @@ def pointer_line(lines):
     return 0
 
 
+CONFIG_PATH_REF = re.compile(r"`(~/\.config/opencode/[^`]*)`")
+
+
+def pointer_path_refs(lines):
+    """抽取行内反引号包裹的 `~/.config/opencode/...` 路径；跳过占位符与模板形态。
+
+    跳过：含尖括号（如 `skills/<name>`）、含省略号（`…` / `...`）。
+    """
+    out = []
+    for i, raw in enumerate(lines, 1):
+        for p in CONFIG_PATH_REF.findall(raw):
+            if any(ch in p for ch in "<>") or "…" in p or "..." in p:
+                continue
+            out.append((i, p))
+    return out
+
+
+def missing_pointer_paths(lines, home):
+    """返回 [(行号, 路径)]：`~/.config/opencode/...` 路径在 `home` 下不存在（仅信息项）。"""
+    return [(n, p) for n, p in pointer_path_refs(lines)
+            if not Path(p.replace("~", str(home))).exists()]
+
+
 # ---------- 断言 7：标准基线（WCAG） ----------
 
 def standards_baseline(lines):
@@ -878,6 +904,14 @@ def run(root, authority, only, quiet):
             rel = str(p.relative_to(root))
             if rel in REQUIRED_POINTERS and not pointer_line(read_lines(p)):
                 failures.append(f"✗ [pointer] {rel} 缺少指向哲学层 §交付闸门 的指针行（消费侧：{REQUIRED_POINTERS[rel]}）")
+        if not quiet:
+            home = Path.home()
+            for p in scanned(root, authority):
+                rel = str(p.relative_to(root))
+                if not rel.startswith("skills/"):
+                    continue
+                for line_no, ref in missing_pointer_paths(read_lines(p), home):
+                    print(f"· [pointer] {rel}:{line_no} 路径不存在：{ref}（信息项，不判红）")
 
     if "standards" in only:
         baseline = standards_baseline(lines)
@@ -1086,6 +1120,20 @@ def selftest():
     case("指针：正文行命中 → 存活", pointer_line(["- [ ] 闸门：见哲学层 §交付闸门（11 项）"]), True)
     case("指针：仅标题行命中 → 报", pointer_line(["## 原型验收条款（消费哲学层 §交付闸门）"]), False)
     case("指针：仅历史 bullet 命中 → 报", pointer_line(["- v1.2.2：条款并入 §交付闸门（见哲学层）"]), False)
+
+    real_home = Path.home()
+    case("指针路径：本机存在的路径 → 不报",
+         missing_pointer_paths(["- 读 `~/.config/opencode/design-spec/references/ui-design-philosophy.md`"], real_home),
+         False)
+    case("指针路径：不存在的路径 → 报",
+         missing_pointer_paths(["- 读 `~/.config/opencode/design-spec/design-spec/references/ui-design-philosophy.md`"], real_home),
+         True)
+    case("指针路径：尖括号占位符 → 不报",
+         missing_pointer_paths(["见 `~/.config/opencode/skills/<name>/SKILL.md`"], Path("/nonexistent-root")),
+         False)
+    case("指针路径：省略号模板 → 不报",
+         missing_pointer_paths(["见 `~/.config/opencode/skills/…`"], Path("/nonexistent-root")),
+         False)
 
     case("基线：权威源解析出 2.2 且为字符串", standards_baseline(lines) == "2.2", True)
     case("基线：2.1 与基线 2.2 冲突 → 报", scan_lines_standards("2.2", ["- 标准：WCAG 2.1 AA"]), True)
