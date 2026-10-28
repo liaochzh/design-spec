@@ -55,3 +55,7 @@ python3 ~/.config/opencode/design-spec/scripts/check-design-spec.py --only point
 ## 文档口径
 
 `docs/plan`、`docs/review`、`docs/test`、`docs/baton` 是本项目的本地工作文档（方案、审查、验收入档、接力棒），按 `.gitignore` **不发布**。
+
+## License
+
+MIT（见 `LICENSE`）。
