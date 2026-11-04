@@ -500,6 +500,7 @@ Apple HIG **44×44 pt** / Material Design 3 **7–10 mm** / WCAG 2.2 AA **24×24
 - Scroll edge effect **只在「滚动内容位于浮动控件之后」时用**（不是装饰）：每视图一个，优先 `automatic` 样式（`soft` 须实测控件可读性），**不手绘渐变遮罩/压条**（本仓禁令；HIG 允许在自定义 bar 上手动施加的仍是系统 effect 本身）。
 - 自定义 toolbar 移除背景色，靠布局与分组表达层级。
 - Reduced Transparency / Increased Contrast / Reduced Motion **自动生效**，不得绕过。
+- **透明度由系统设置决定**：iOS 27 起 Settings › Appearance › Liquid Glass 为**连续滑块**（`ultra clear ↔ fully tinted`，默认取中点），并与 Reduce Transparency / Increase Contrast 叠加生效。应用**不得写死透明度**，也不得自绘近似以覆盖系统结果（滑块设置项依据 Apple iOS 27 发布说明与 2026-06/09 报道，属媒体级证据；HIG Materials v27 正文 2026-10-05 仅确认瞬态例外、未列滑块，2026-11-04 核）。
 - 增量指引（2026 HIG）：Menus 图标仅辅助文字；Sidebars 用 tint 图标 + adaptable 样式；App icons 按 Liquid Glass 分层设计（可用 Icon Composer 单设计出 iPhone/iPad/Mac/Apple Watch；随 Xcode 提供，亦可从 Apple Developer 网站获取，2026-10 正文核读）。
 - App icons 外观：default / dark / clear / tinted 四种均保留**同一核心特征**（替代图标也要各自有变体）；高光 / 层间投影 / 模糊由系统施加，**不需要手绘**（刻意加须用 Icon Composer 实测）；前景层用矢量（SVG/PDF）且**不预置遮罩**（形状交系统 mask），主体居中防裁切；不使用 Apple 硬件复制品。
 - 搜索走系统 search 能力（Search tab / `.searchable`），**不自绘搜索框**；入口三选（tab 栏 / 工具栏 / 内联字段），底部有空间时优先底部，**底部内容为主或无底部工具栏时置顶**；tab 两风格：`standard` 先给建议与分类（供发现）、`button` 直接聚焦出键盘（求快）。
@@ -530,7 +531,7 @@ Apple HIG **44×44 pt** / Material Design 3 **7–10 mm** / WCAG 2.2 AA **24×24
 - 大按钮 + 次要色强调（研究：关键元素识别快 4 倍，老年用户追平年轻用户）。
 - 可变字体轴可做动态字重/字宽。
 - Expressive layout system：新 layout scaffold + **8dp 基准 spacing token**（可编程适配设备/密度，与 §间距 4/8 基准兼容不冲突）。
-- Android 转向 Compose-first：Material Views 1.14 为**最后一个 stable 发布**（官方 "all in on Compose"），此后仅维护；Material Compose 1.5.0 预计 2026 H2 发布并转 stable（截至 2026-10-26：stable 1.4.0 / beta 1.5.0-beta02），转 stable 后 Expressive 实验 API 才可作默认位，此前仍以 stable API 为准。
+- Android 转向 Compose-first：Material Views 1.14 为**最后一个 stable 发布**（官方 "all in on Compose"），此后仅维护；Material Compose 1.5.0 预计 2026 H2 发布并转 stable（截至 2026-11-04 核读，官方发布页最新版本日期 2026-10-21：stable 1.4.0 / beta 1.5.0-beta02），转 stable 后 Expressive 实验 API 才可作默认位，此前仍以 stable API 为准。
 - Type scale 支持按语言文字高度类别自适应行高（与 App「字号跟随系统」方向一致）。
 - 列表两形态：standard / segmented；segmented 由容器自动管理 adaptive corner shapes 与选中态配色（点击 / 切换 / 选中即时变换容器），**不需手绘选中背景**。
 - Search 可与 App bar 一体：navigation / action 槽位在搜索容器之外；`contained` 展开后仍保留折叠形态（持久容器），`expanded dock search bar` 可平滑过渡。
@@ -557,7 +558,7 @@ Apple HIG **44×44 pt** / Material Design 3 **7–10 mm** / WCAG 2.2 AA **24×24
 | 报纸密栏 | hairline + 零圆角 + 密栏 | 媒体/档案且 Brief 点名 |
 | 大面积毛玻璃 | 连续多层 blur、玻璃套玻璃 | Brief 明示 |
 | Bento 网格堆砌 | 每格一卡片 + 彩色渐变 + 圆角图标居中 | Brief 明示 |
-| 渐变光晕 Aurora | 紫粉蓝大色块 + blur blob | Brief 明示 |
+| 渐变光晕 Aurora | 紫粉蓝大色块 + blur blob（**AI 常见组合**：lavender 主色 + Inter 全站 + 居中 hero 徽标 + 功能卡网格 + glow） | Brief 明示 |
 | 等宽字体滥用 | 全站 mono，无视信息层级 | Brief 明示 |
 | Barely-there 极简克制 | 近白底 + 1px 发丝线 + 超大留白 + 小字号单一无衬线 + 几乎无彩色 | Brief 明示（企业/工具/高端服务）；**极简 ≠ 减内容**（HIG：simplicity isn't minimalism）——要素仍须各司其职，靠减信息换来的「干净」不算极简 |
 | Anti-grid 刻意破碎网格 | 元素越界/错位/重叠/旋转 + 网格可见或被打断 | Brief 明示（实验/艺术/编辑）；错位须编码分组/顺序，不得遮挡焦点或伪装可交互 |
@@ -570,6 +571,7 @@ Apple HIG **44×44 pt** / Material Design 3 **7–10 mm** / WCAG 2.2 AA **24×24
 | Liquid Glass 用在内容层 | 卡片/列表项套玻璃 | **禁用**（违反平台硬规则；瞬态交互控件例外见上方硬规则） |
 | 渐变胶囊按钮 | 渐变填充 + 全圆角 + 阴影 | Brief 明示 |
 | Emoji 当图标 | 用系统 emoji 替代图标库 | **禁用** |
+| AI 默认 Material 紫 | 紫色 primary + FAB + 卡片列表 + 默认 M3 形状 | Brief 明示（模板 / Agent 生成常把默认主题当设计，须显式选色） |
 
 ## 交付闸门（AI 产物）与交付质检
 
@@ -780,6 +782,7 @@ Token：颜色 <4-6 命名> / 字体 <Display+Body(+Utility)> / 布局 <一句�
 ### 变更日志
 | 版本 | 日期 | 变更章节 | 变更理由 | 兼容性 |
 |---|---|---|---|---|
+| 2.6.0 | 2026-11-04 | §俗套校准表（Web / App）、§平台设计语言硬规则 · Apple / · M3 | 2026-11-04 季度复核落地：App 表 +1「AI 默认 Material 紫」；Web「渐变光晕 Aurora」特征列补 AI 常见组合（不新增独立条目、A 库不动）；Apple 补「Liquid Glass 透明度由系统设置决定」条（iOS 27 连续滑块，媒体级证据已标注）；M3 版本核读日期前移；配套 app-design 1.4.0 / frontend-design 2.2.2 | 兼容（新增 1 条俗套 + 1 条硬规则澄清 + 特征列扩张，无删除 / 无迁移） |
 | 2.5.0 | 2026-10-27 | §布局与对齐（新章）、§组件基线（新章）、§跨页一致性（新章）、§导航与转场（新章）、§兼容基线（新章）、§快速决策树、§加载分层、§两遍工作法、§跨端系统自检清单、§输出模板、§演进机制 | 新增跨页与跨环境 5 章（原语与对齐不变量 / 控件契约与状态集 / Page Shell 与跨页不变量 / 层级模型与转场降级 / Baseline 口径与高风险退路）；Q2 与 L1 补路由；两遍工作法第一遍改四清单；自检 +5 行；输出模板 +2 字段；季审 +3 行；配套 frontend-design 2.2.0 / app-design 1.3.0 | 兼容（新增章节与路由，无条款删除 / 无迁移） |
 | 2.4.15 | 2026-10-27 | §无障碍基线 | 基线表 +4 行（`1.1.1` 非文本内容 / `2.1.1` 键盘可达 / `4.1.2` 名称角色值 / `2.4.7` 焦点可见，13→17）；条款号对照句同步；属对标开源同类 skill 后补齐的高频漏洞（替代文本、键盘可达、三要素、焦点可见），配套 accessibility 1.2.0 | 兼容（纯新增条款，无迁移） |
 | 2.4.14 | 2026-10-27 | §交互规范 · 表单与校验（新节）、§无障碍基线、§快速决策树、§演进机制 | 新增 §交互规范 · 表单与校验（校验时机 / 错误定位与可见性 / 不重复输入 / 高风险提交前确认 / 标签与说明）；§无障碍基线 表 +4 行（`3.3.1` / `3.3.2` / `3.3.3` / `3.3.4`，9→13）；Q2 括注补「表单与校验」；季审增该节；配套 accessibility 1.1.5 / frontend-design 2.1.14 / app-design 1.2.15 | 兼容（新增节 + 基线表 +4 行 + 1 处加严：3.3.4 法律/金融/删除类「至少可查 +（可逆或确认）」；无迁移） |
