@@ -392,7 +392,7 @@ Web 用 `px`；iOS 用 `pt`；Android 用 `dp`。
 | `easing/emphasis` | `cubic-bezier(0.05, 0.7, 0.1, 1)` | 强调 / 退出 |
 
 - **动效有因**：每个动画必须能说出服务主题的理由；系统减弱动效设置下仍可用（三平台 API 见 §通用自检清单，SC 2.3.3 见 §无障碍基线，均不在此复述）；**降级只减装饰不减功能**（与 §交互规范 · 边界状态的低电量口径一致），且**动效不得阻塞输入与首屏可读**。
-- **滚动驱动只做渐进增强**：`animation-timeline` / `view()` 属 Limited availability（非 Baseline，2026-10-26 核 MDN），**不得**作为默认可读态的前提——必须 `@supports` 包裹、无动画时内容完整可读、长列表禁用、不得替代加载态。
+- **滚动驱动只做渐进增强**：`animation-timeline` / `view()` 已升 **Baseline 2026 newly available**（since 2026-10，2026-11-06 核 MDN / api.webstatus.dev；未达 widely available，按 ≥2.5 年口径约 2029-02），**仍不得**作为默认可读态的前提——必须 `@supports` 包裹、无动画时内容完整可读、长列表禁用、不得替代加载态。
 
 ### 触达尺寸（取最严者）
 Apple HIG **44×44 pt** / Material Design 3 **7–10 mm** / WCAG 2.2 AA **24×24 CSS px**（或间距足够防误触）。
@@ -482,7 +482,8 @@ Apple HIG **44×44 pt** / Material Design 3 **7–10 mm** / WCAG 2.2 AA **24×24
 
 - **口径**：默认可用的上限是 MDN Baseline `widely available`（在全部 Baseline 浏览器中稳定支持 ≥2.5 年，2026-10 核读）；`newly available` 只能作增强并附降级；`limited availability` 不得作为唯一路径。
 - **三层判定**：① 基线内 → 直接用；② 新特性 → 特性检测或 `@supports` 内使用 + 降级；③ 不支持时 → 内容可读、操作可完成。
-- **Web 高风险清单**（每项必须写退路）：`dvh` / `svh` 定高全屏（不用裸 `100vh`）；输入字号 ≥16px（防 iOS 聚焦缩放）；`backdrop-filter` 需 `-webkit-` 前缀且不得作唯一层级手段；`env(safe-area-inset-*)` 需配 `viewport-fit=cover`；`-webkit-tap-highlight-color`；`overscroll-behavior`；`scrollbar-gutter`；sticky 在滚动容器内失效；`text-box-trim` 属 Baseline 2026 新增（2026-10 核读），只能增强、用 padding 兜底。
+- **Web 高风险清单**（每项必须写退路）：输入字号 ≥16px（防 iOS 聚焦缩放）；`backdrop-filter` 需 `-webkit-` 前缀且不得作唯一层级手段；`env(safe-area-inset-*)` 需配 `viewport-fit=cover`；`-webkit-tap-highlight-color`；`overscroll-behavior`；`scrollbar-gutter`；sticky 在滚动容器内失效；`text-box-trim` 属 Baseline 2026 新增（2026-10 核读），只能增强、用 padding 兜底。
+- **定高全屏**：用 `dvh`、不用裸 `100vh`。该项已不属高风险——`dvh` / `svh` / `lvh` 自 2025-06-05 起 **widely available**（2026-11-06 核 api.webstatus.dev），可作默认可读态前提。
 - **App 下限声明**：iOS 17+ / Android 10+；低于下限只保可用不保视觉；平台 API 分支用 `#available` / `Build.VERSION`，不用型号判断。
 - **验证矩阵必须贴表**，未测项写 N/A 并给理由：Web 320 / 360 / 390 / 430 / 768 / 1024 / 1440 × Safari(iOS) / Chrome(Android) / 桌面三引擎；App 360dp / iPhone SE / 标准 / 大屏 / 平板 × 系统字号 130% / 200% × 深色 / 浅色。
 
@@ -536,7 +537,7 @@ Apple HIG **44×44 pt** / Material Design 3 **7–10 mm** / WCAG 2.2 AA **24×24
 - 列表两形态：standard / segmented；segmented 由容器自动管理 adaptive corner shapes 与选中态配色（点击 / 切换 / 选中即时变换容器），**不需手绘选中背景**。
 - Search 可与 App bar 一体：navigation / action 槽位在搜索容器之外；`contained` 展开后仍保留折叠形态（持久容器），`expanded dock search bar` 可平滑过渡。
 - Menu 分组用 `MenuDefaults.GroupShape`（自动圆角容器）+ gaps 呼吸间距，**不手绘分组背景**。
-- 自适应导航（Nav3）：按 backstack + 屏幕尺寸自动单栏 / 双栏（list-detail），并自带 Predictive Back 预览；采用 Nav3 + Material adaptive 时**不手写尺寸分支与返回动画**。
+- 自适应导航（Nav3）：按 backstack + 屏幕尺寸自动单栏 / 双栏（list-detail），并自带 Predictive Back 预览；采用 Nav3 + Material adaptive 时**不手写尺寸分支与返回动画**。成熟度：Nav3 自 `1.2.0`（2026-09-23）起 **stable**，最新 stable `1.2.1`（2026-11-04），可直接作默认导航实现；`1.3.x` 仍在 alpha（2026-11-06 核 androidx releases）。
 - 状态化样式可用 Styles API（Compose `@Experimental`；foundation 1.12+ / BOM 2026.04.01 起）：替代样式参数（padding / 颜色），**不替代 modifiers**；实验期内不得挤掉 stable API 的默认位。
 - Styles 口径以 foundation 1.12 stable 为准；Material 组件原生 style 参数官方仅称「future releases」（与 Material Compose 1.5.0 同期推进，未点名版本；截至 2026-10-26 仍未点名），实验期 API 形状仍在变。
 - Predictive Back：Android 16+ 默认开启，返回手势必须有预览；13–15 需 `android:enableOnBackInvokedCallback`，交付注明目标版本。
@@ -782,6 +783,7 @@ Token：颜色 <4-6 命名> / 字体 <Display+Body(+Utility)> / 布局 <一句�
 ### 变更日志
 | 版本 | 日期 | 变更章节 | 变更理由 | 兼容性 |
 |---|---|---|---|---|
+| 2.6.1 | 2026-11-06 | §交互规范 · 动效与滚动、§平台设计语言硬规则 · M3、§兼容基线 | 2026-11-06 补充核查的口径订正（旧复核 §11.3 P1-1/P2-1/P2-2/P3-1）：`animation-timeline` / `view()` 由 Limited availability 订正为 Baseline 2026 newly available（仍只能 `@supports` 增强，结论不变）；Nav3 补成熟度（已 stable，可作默认导航实现）；`dvh` / `svh` 移出 Web 高风险清单（widely available，结论「定高全屏用 `dvh`」保留）；`text-box-trim` 条复核无变化。四组结论均未改，仅事实描述精度订正 | 兼容（无条款删除 / 无迁移） |
 | 2.6.0 | 2026-11-04 | §俗套校准表（Web / App）、§平台设计语言硬规则 · Apple / · M3 | 2026-11-04 季度复核落地：App 表 +1「AI 默认 Material 紫」；Web「渐变光晕 Aurora」特征列补 AI 常见组合（不新增独立条目、A 库不动）；Apple 补「Liquid Glass 透明度由系统设置决定」条（iOS 27 连续滑块，媒体级证据已标注）；M3 版本核读日期前移；配套 app-design 1.4.0 / frontend-design 2.2.2 | 兼容（新增 1 条俗套 + 1 条硬规则澄清 + 特征列扩张，无删除 / 无迁移） |
 | 2.5.0 | 2026-10-27 | §布局与对齐（新章）、§组件基线（新章）、§跨页一致性（新章）、§导航与转场（新章）、§兼容基线（新章）、§快速决策树、§加载分层、§两遍工作法、§跨端系统自检清单、§输出模板、§演进机制 | 新增跨页与跨环境 5 章（原语与对齐不变量 / 控件契约与状态集 / Page Shell 与跨页不变量 / 层级模型与转场降级 / Baseline 口径与高风险退路）；Q2 与 L1 补路由；两遍工作法第一遍改四清单；自检 +5 行；输出模板 +2 字段；季审 +3 行；配套 frontend-design 2.2.0 / app-design 1.3.0 | 兼容（新增章节与路由，无条款删除 / 无迁移） |
 | 2.4.15 | 2026-10-27 | §无障碍基线 | 基线表 +4 行（`1.1.1` 非文本内容 / `2.1.1` 键盘可达 / `4.1.2` 名称角色值 / `2.4.7` 焦点可见，13→17）；条款号对照句同步；属对标开源同类 skill 后补齐的高频漏洞（替代文本、键盘可达、三要素、焦点可见），配套 accessibility 1.2.0 | 兼容（纯新增条款，无迁移） |
