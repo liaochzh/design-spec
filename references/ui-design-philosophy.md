@@ -457,11 +457,11 @@ Apple HIG **44×44 pt** / Material Design 3 **7–10 mm** / WCAG 2.2 AA **24×24
 | 尺寸类 | 布局范式 | 导航（按平台，不按宽度唯一决定） |
 |---|---|---|
 | compact | feed 单列 | iOS / Android：bottom bar |
-| medium | 单列，或 list-detail 双栏（高度 compact 时退回单列） | Android：rail（窄侧栏）；iOS：**仍 TabBar**，不为 medium 换 rail；iPadOS 18+：顶部 Tab 条 |
+| medium | 单列，或 list-detail 双栏（高度 compact 时退回单列） | Android：rail（窄侧栏）；iOS：**仍 TabBar**，不为 medium 换 rail（折叠机的侧栏由系统给，不是 App 的宽度分支）；iPadOS 18+：顶部 Tab 条 |
 | expanded | list-detail 常驻（列表与详情同屏） | Android：rail；iPadOS：顶部 Tab 条可变形为侧栏 |
 | large 及以上 | supporting pane（主 + 辅，列数上限 3） | 侧栏常驻并独立滚动；不为第四栏继续切分 |
 
-> **iOS 不按宽度换导航**：iPhone 全宽度都是 TabBar（折叠机横持时系统把 TabBar 与工具栏**竖排到侧边**，属系统行为，实现层不手写）。iPadOS 18 起顶部 Tab 条可变形为侧栏——**不要再做「左侧常驻 rail + 列表 + 内容」三列**，那是旧一代做法。依据：Apple Tech Talk 111461 / 111463、WWDC24-10147（2026-11-10 核读）。
+> **iOS 不按宽度换导航**：iPhone 全宽度都是 TabBar（折叠 iPhone Duo 的系统栏——状态栏 / 灵动岛 / TabBar / toolbar——**竖排在持握侧边**，属系统行为，实现层不手写；见 §Apple · iPhone Duo）。iPadOS 18 起顶部 Tab 条可变形为侧栏——**不要再做「左侧常驻 rail + 列表 + 内容」三列**，那是旧一代做法。依据：Apple Tech Talk 111461 / 111463、WWDC24-10147（2026-11-10 核读）。
 
 **天花板**：断点是否贴合具体产品内容、分屏下是否真的「不遮挡」需真机实测；本节只给判据，不给实现教程。
 
@@ -538,7 +538,9 @@ Apple HIG **44×44 pt** / Material Design 3 **7–10 mm** / WCAG 2.2 AA **24×24
 
 > 折叠**通用**判据（形态重建保状态、铰链/折痕区避让、看姿态不看角度）见 §形态与共存；机型 / UA 分支禁令见 §自适应布局。本块只写 Duo 特有差异。
 
-- **两种尺寸类别 = 屏幕态，不是 App 态**：外屏 compact（相对直板 iPhone 更宽更矮，系统把 tab bar / toolbar / 导航控件竖排到侧边以保留内容高度）；内屏 regular（常规横向栏）。
+- **两种尺寸类别 = 屏幕态，不是 App 态**：外屏 compact（相对直板 iPhone 更宽更矮），系统把**整条系统栏**——状态栏、竖排灵动岛、tab bar、toolbar——竖排进**一条侧栏**以保留内容高度；内屏 regular（常规横向栏，系统区回到顶部）。
+- **侧栏在持握侧，不是「固定右边」**：侧栏贴**物理外缘**（当前持握侧），换手持 / 横持会移到另一侧；内屏竖持**没有侧栏**。App 侧只按 safe area **逐边**避让，**禁止**写死「右侧固定留白」，也禁止按机型判断栏在哪边（与 §自适应布局 的「尺寸驱动、不认设备」同源）。
+- **侧栏内是系统保留区**：App 不放自有控件 / 浮层 / 品牌装饰（与「reserved regions 是条件区域」同源）；系统内容（如 Live Activity）占去栏内高度时由系统收起 / 溢出 toolbar，页面不因此挤压或重排内容。
 - **内屏可被系统 Split View 并排双 App**：按**当前可用宽度重新落档**，不得把「内屏＝双栏」写死；半宽下按 §自适应布局 的档位判据降级（原型侧档位阈值与设备数值 owner 见 `product-prototype-generation`）。
 - **reserved regions 是条件区域，不是固定中间槽**：外前摄常驻（可扩进 Dynamic Island）、内前摄仅相机激活时占用、折痕区随姿态存在。系统组件（alert / sheet / context menu / split view）自动让位；自定义锚定控件用 `ReservedRegion`（SwiftUI / UIKit；iOS 27.1+，以 SDK 为准——availability 已核 2026-10-26）避让。
 - **本条禁止的是 App 实现里写死前摄 / 折痕几何**；原型渲染所需的估计折痕宽度与 cutout 属 `product-prototype-generation/constants.js`（【估计】级数据），不视为违规。
@@ -546,7 +548,7 @@ Apple HIG **44×44 pt** / Material Design 3 **7–10 mm** / WCAG 2.2 AA **24×24
 - 跨折痕的**连续内容**（文章 / 列表 / 信息流）保持连续滚动，不跳区。
 - 内外屏**比例近似**（官方称同宽高比），故布局**不以比例分支**；几何数值与推导 owner 在 `constants.js`。
 - 分栏用系统容器：`NavigationSplitView` / `UISplitViewController`；需要姿态感知移位时用 arrangement view（split / overlay），不机械替换所有 `HStack/VStack/ZStack`。
-> **归因**：块内除下列两处外均为 HIG「Designing for iPhone Duo」直述——① 「跨折痕连续内容保持连续滚动、不跳区」为本仓引申（HIG 最近似句「Avoid extreme layout changes…favor small adjustments over rearranging」针对尺寸类别切换时的控件排布，未覆盖滚动连续性；本仓据此扩到连续内容）；② 「内外屏比例近似」出自 Apple Newsroom 2026-09-09（「Both displays share the same aspect ratio」），HIG Duo 页无此句。
+> **归因**：块内除下列四处外均为 HIG「Designing for iPhone Duo」直述——① 「跨折痕连续内容保持连续滚动、不跳区」为本仓引申（HIG 最近似句「Avoid extreme layout changes…favor small adjustments over rearranging」针对尺寸类别切换时的控件排布，未覆盖滚动连续性；本仓据此扩到连续内容）；② 「内外屏比例近似」出自 Apple Newsroom 2026-09-09（「Both displays share the same aspect ratio」），HIG Duo 页无此句；③ 「侧栏在持握侧（物理外缘）」「内屏竖持无侧栏」为本仓引申（HIG 只述「系统把控件竖排到侧边」，未写随持握侧换边的判定句；持握侧口径见 Apple `/iphone-duo/prepare/` 与 Tech Talk 111466 的「trailing edge」表述，2026-11-10 核读）；④ 「侧栏保留区 / Live Activity 占高时 toolbar 收起」为本仓引申（HIG 无该场景的退让句；栏内实测几何见 `product-prototype-generation/constants.js`，本块不写数值）。
 
 ### Material 3 Expressive（Android）
 - 形状库 + 形状变形可用，但**官方警告要克制**，否则混乱。
@@ -809,6 +811,7 @@ Token：颜色 <4-6 命名> / 字体 <Display+Body(+Utility)> / 布局 <一句�
 ### 变更日志
 | 版本 | 日期 | 变更章节 | 变更理由 | 兼容性 |
 |---|---|---|---|---|
+| 2.9.0 | 2026-11-11 | §平台设计语言硬规则 · Apple · iPhone Duo、§自适应布局（尺寸类 → 范式 → 导航表 / iOS 不按宽度换导航） | 补「竖向系统栏」事实：Duo 外屏竖持时状态栏 / 竖排灵动岛 / TabBar / toolbar 同处**一条侧边系统栏**，贴持握侧物理外缘（横持随持握侧换边），内屏竖持无侧栏。Duo 块首条改写 + 新增「侧栏在持握侧不是固定右边」「侧栏内是系统保留区」两条；归因行由 2 处扩到 4 处；订正表内「折叠机横持时…」口径（不止横持）与 medium 行（侧栏由系统给，不是 App 的宽度分支）。数值（栏宽 / 栏内几何）**不进本节**，归 `product-prototype-generation`；配套 app-design 1.7.0 | 兼容（新增条款 + 表述订正，无删除 / 无迁移） |
 | 2.8.0 | 2026-11-10 | §自适应布局、§形态与共存、§兼容基线、§演进机制 | 补 2026 年平板 / 折叠 / 多窗口事实：新增「尺寸类是两维不是方向」（折叠内屏不响应方向）、「平板不是放大的手机」（iPadOS 26 自由窗口、sidebar↔tab 变形、非破坏式布局变更）、「尺寸类 → 范式 → 导航」表（导航按**平台**定，iOS 全宽 TabBar、iPadOS 18+ 顶部 Tab 条，禁旧式三列）；Android 16/17 强制自适应并入「多窗口不破」；§形态与共存 增「安全区分层不整页内缩」「位移不是重排」「布局切换不得重建元素树」「不 letterbox」「页面不自绘折痕避让」；验证矩阵 +多形态行。数值（rail 宽 / 侧栏避让 / 矮横屏阈）**不进本节**，归 `product-prototype-generation`；配套 app-design 1.6.0 / frontend-design 2.3.1 | 兼容（新增条款与表，无删除；1 处收紧：折叠避让由「按姿态分区」细化到「系统承担避让、页面不自绘」，既有判定可反转） |
 | 2.7.0 | 2026-11-07 | §图标规范、§贴图规范、§两遍工作法、§跨端系统自检清单 | 风格驱动图标插图分支（白名单生成/黑名单固定/角色级回退）+ 项目设计标准单前置（色/字/控件/布局/按钮位/交互 A-L 分组，含标准单回写流） | 兼容（§贴图约束1 由整屏单一放宽为按角色判定 + 图标豁免，既有判定可反转；新增前置标准无迁移） |
 | 2.6.1 | 2026-11-06 | §交互规范 · 动效与滚动、§平台设计语言硬规则 · M3、§兼容基线 | 2026-11-06 补充核查的口径订正（旧复核 §11.3 P1-1/P2-1/P2-2/P3-1）：`animation-timeline` / `view()` 由 Limited availability 订正为 Baseline 2026 newly available（仍只能 `@supports` 增强，结论不变）；Nav3 补成熟度（已 stable，可作默认导航实现）；`dvh` / `svh` 移出 Web 高风险清单（widely available，结论「定高全屏用 `dvh`」保留）；`text-box-trim` 条复核无变化。四组结论均未改，仅事实描述精度订正 | 兼容（无条款删除 / 无迁移） |
