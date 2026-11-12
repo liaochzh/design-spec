@@ -12,3 +12,5 @@ docs/review/
 docs/test/
 docs/baton/
 docs/archive/
+# docs-archive 暂存区（原件已移入此处 + 项目外备份；临时目录，不入库）
+docs/.trash/
